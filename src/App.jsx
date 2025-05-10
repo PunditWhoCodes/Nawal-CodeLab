@@ -9,7 +9,7 @@ import Testimonials from './sections/Testimonials';
 
 const App = () => {
   return (
-    <>
+    <div className='flex flex-col '>
       <Header />
       <Hero />
       <About />
@@ -17,7 +17,7 @@ const App = () => {
       <Pricing />
       <Contact />
       <Footer />
-    </>
+    </div>
   )
 }
 
