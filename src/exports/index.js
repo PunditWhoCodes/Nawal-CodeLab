@@ -56,7 +56,7 @@ export const clients = [
 
     {
         image: client4,
-        about: 'Investing in Nawals CodeLab last year has been one of my most rewarding educational decisions, offering unparalleled returns on investment. With top-notch instructors and content tailored for advanced learners, it is truly a game-changer in education.',
+        about: 'Investing in Nawals CodeLab last year has been one of my most rewarding educational decisions, offering unparalleled returns on investment. With top-notch instructors and content tailored for advanced learners.',
         name: 'Dipti Verma',
         profile: 'Full Stack Developer'
     }
