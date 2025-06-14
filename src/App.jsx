@@ -1,23 +1,48 @@
 import React from 'react'
-import Header from './sections/Header';
-import About from './sections/About';
-import Contact from './sections/Contact';
-import Footer from './sections/Footer';
-import Hero from './sections/Hero';
-import Pricing from './sections/Pricing';
-import Testimonials from './sections/Testimonials';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { Toaster } from 'react-hot-toast'
+import { AuthProvider } from './contexts/AuthContext'
+import Header from './components/layout/Header'
+import Footer from './components/layout/Footer'
+import HomePage from './pages/HomePage'
+import CoursesPage from './pages/CoursesPage'
+import DashboardPage from './pages/DashboardPage'
+import ProtectedRoute from './components/auth/ProtectedRoute'
 
 const App = () => {
   return (
-    <div className='flex flex-col '>
-      <Header />
-      <Hero />
-      <About />
-      <Testimonials />
-      <Pricing />
-      <Contact />
-      <Footer />
-    </div>
+    <AuthProvider>
+      <Router>
+        <div className="min-h-screen flex flex-col">
+          <Header />
+          <main className="flex-1">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/courses" element={<CoursesPage />} />
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <DashboardPage />
+                  </ProtectedRoute>
+                } 
+              />
+            </Routes>
+          </main>
+          <Footer />
+          <Toaster 
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: '#363636',
+                color: '#fff',
+              },
+            }}
+          />
+        </div>
+      </Router>
+    </AuthProvider>
   )
 }
 

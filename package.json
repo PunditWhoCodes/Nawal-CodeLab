@@ -1,5 +1,5 @@
 {
-  "name": "debug-entity",
+  "name": "nawals-codelab-fullstack",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -11,7 +11,18 @@
   },
   "dependencies": {
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.1",
+    "@supabase/supabase-js": "^2.38.4",
+    "framer-motion": "^10.16.16",
+    "lucide-react": "^0.294.0",
+    "react-hot-toast": "^2.4.1",
+    "react-hook-form": "^7.48.2",
+    "@hookform/resolvers": "^3.3.2",
+    "zod": "^3.22.4",
+    "date-fns": "^2.30.0",
+    "react-player": "^2.13.0",
+    "react-markdown": "^9.0.1"
   },
   "devDependencies": {
     "@types/react": "^18.2.64",
