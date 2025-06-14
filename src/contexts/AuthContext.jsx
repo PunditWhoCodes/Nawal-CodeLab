@@ -30,6 +30,7 @@ export const AuthProvider = ({ children }) => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email)
         setUser(session?.user ?? null)
         if (session?.user) {
           fetchProfile(session.user.id)
@@ -52,7 +53,8 @@ export const AuthProvider = ({ children }) => {
         .single()
 
       if (error && error.code !== 'PGRST116') {
-        throw error
+        console.error('Error fetching profile:', error)
+        return
       }
 
       setProfile(data)
@@ -63,6 +65,8 @@ export const AuthProvider = ({ children }) => {
 
   const signUp = async (email, password, fullName) => {
     try {
+      setLoading(true)
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -73,7 +77,11 @@ export const AuthProvider = ({ children }) => {
         }
       })
 
-      if (error) throw error
+      if (error) {
+        console.error('Signup error:', error)
+        toast.error(error.message)
+        return { data: null, error }
+      }
 
       if (data.user) {
         // Create profile
@@ -87,43 +95,64 @@ export const AuthProvider = ({ children }) => {
             }
           ])
 
-        if (profileError) throw profileError
+        if (profileError) {
+          console.error('Profile creation error:', profileError)
+          toast.error('Account created but profile setup failed')
+        } else {
+          toast.success('Account created successfully!')
+        }
       }
 
-      toast.success('Account created successfully!')
       return { data, error: null }
     } catch (error) {
-      toast.error(error.message)
+      console.error('Signup error:', error)
+      toast.error(error.message || 'Failed to create account')
       return { data: null, error }
+    } finally {
+      setLoading(false)
     }
   }
 
   const signIn = async (email, password) => {
     try {
+      setLoading(true)
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
-      if (error) throw error
+      if (error) {
+        console.error('Signin error:', error)
+        toast.error(error.message)
+        return { data: null, error }
+      }
 
       toast.success('Signed in successfully!')
       return { data, error: null }
     } catch (error) {
-      toast.error(error.message)
+      console.error('Signin error:', error)
+      toast.error(error.message || 'Failed to sign in')
       return { data: null, error }
+    } finally {
+      setLoading(false)
     }
   }
 
   const signOut = async () => {
     try {
       const { error } = await supabase.auth.signOut()
-      if (error) throw error
+      if (error) {
+        console.error('Signout error:', error)
+        toast.error(error.message)
+        return
+      }
       
       setProfile(null)
       toast.success('Signed out successfully!')
     } catch (error) {
-      toast.error(error.message)
+      console.error('Signout error:', error)
+      toast.error(error.message || 'Failed to sign out')
     }
   }
 

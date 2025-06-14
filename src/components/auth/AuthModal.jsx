@@ -8,15 +8,15 @@ import Button from '../ui/Button'
 import { useAuth } from '../../contexts/AuthContext'
 
 const signInSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  email: z.string().min(1, 'Email is required').email('Invalid email address'),
+  password: z.string().min(1, 'Password is required').min(6, 'Password must be at least 6 characters'),
 })
 
 const signUpSchema = z.object({
-  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z.string(),
+  fullName: z.string().min(1, 'Full name is required').min(2, 'Full name must be at least 2 characters'),
+  email: z.string().min(1, 'Email is required').email('Invalid email address'),
+  password: z.string().min(1, 'Password is required').min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string().min(1, 'Please confirm your password'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -28,8 +28,9 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'signin' }) => {
   const { signIn, signUp } = useAuth()
 
   const schema = mode === 'signin' ? signInSchema : signUpSchema
-  const { register, handleSubmit, formState: { errors }, reset } = useForm({
-    resolver: zodResolver(schema)
+  const { register, handleSubmit, formState: { errors }, reset, clearErrors } = useForm({
+    resolver: zodResolver(schema),
+    mode: 'onChange'
   })
 
   const onSubmit = async (data) => {
@@ -37,14 +38,14 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'signin' }) => {
     
     try {
       if (mode === 'signin') {
-        const { error } = await signIn(data.email, data.password)
-        if (!error) {
+        const result = await signIn(data.email, data.password)
+        if (result && !result.error) {
           onClose()
           reset()
         }
       } else {
-        const { error } = await signUp(data.email, data.password, data.fullName)
-        if (!error) {
+        const result = await signUp(data.email, data.password, data.fullName)
+        if (result && !result.error) {
           onClose()
           reset()
         }
@@ -59,13 +60,14 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'signin' }) => {
   const toggleMode = () => {
     setMode(mode === 'signin' ? 'signup' : 'signin')
     reset()
+    clearErrors()
   }
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={mode === 'signin' ? 'Sign In' : 'Create Account'}
+      title={mode === 'signin' ? 'Sign In to Your Account' : 'Create Your Account'}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {mode === 'signup' && (
@@ -78,11 +80,11 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'signin' }) => {
         )}
         
         <Input
-          label="Email"
+          label="Email Address"
           type="email"
           {...register('email')}
           error={errors.email?.message}
-          placeholder="Enter your email"
+          placeholder="Enter your email address"
         />
         
         <Input
@@ -107,15 +109,16 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'signin' }) => {
           type="submit"
           className="w-full"
           loading={loading}
+          disabled={loading}
         >
-          {mode === 'signin' ? 'Sign In' : 'Create Account'}
+          {loading ? 'Please wait...' : (mode === 'signin' ? 'Sign In' : 'Create Account')}
         </Button>
 
         <div className="text-center">
           <button
             type="button"
             onClick={toggleMode}
-            className="text-green-600 hover:text-green-700 text-sm"
+            className="text-green-600 hover:text-green-700 text-sm font-medium"
           >
             {mode === 'signin' 
               ? "Don't have an account? Sign up" 
