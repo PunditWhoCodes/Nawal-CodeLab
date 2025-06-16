@@ -7,6 +7,7 @@ import Footer from './components/layout/Footer'
 import HomePage from './pages/HomePage'
 import CoursesPage from './pages/CoursesPage'
 import DashboardPage from './pages/DashboardPage'
+import AuthCallbackPage from './pages/AuthCallbackPage'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 
 const App = () => {
@@ -19,6 +20,7 @@ const App = () => {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/courses" element={<CoursesPage />} />
+              <Route path="/auth/callback" element={<AuthCallbackPage />} />
               <Route 
                 path="/dashboard" 
                 element={

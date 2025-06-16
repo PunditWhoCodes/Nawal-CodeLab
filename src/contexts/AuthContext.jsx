@@ -73,7 +73,8 @@ export const AuthProvider = ({ children }) => {
         options: {
           data: {
             full_name: fullName,
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`
         }
       })
 
@@ -84,23 +85,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       if (data.user) {
-        // Create profile
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([
-            {
-              id: data.user.id,
-              full_name: fullName,
-              email: email,
-            }
-          ])
-
-        if (profileError) {
-          console.error('Profile creation error:', profileError)
-          toast.error('Account created but profile setup failed')
-        } else {
-          toast.success('Account created successfully!')
-        }
+        toast.success('Account created successfully! Please check your email to verify your account.')
       }
 
       return { data, error: null }
@@ -124,7 +109,13 @@ export const AuthProvider = ({ children }) => {
 
       if (error) {
         console.error('Signin error:', error)
-        toast.error(error.message)
+        if (error.message.includes('Email not confirmed')) {
+          toast.error('Please check your email and click the confirmation link before signing in.')
+        } else if (error.message.includes('Invalid login credentials')) {
+          toast.error('Invalid email or password. Please check your credentials and try again.')
+        } else {
+          toast.error(error.message)
+        }
         return { data: null, error }
       }
 
@@ -133,6 +124,33 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Signin error:', error)
       toast.error(error.message || 'Failed to sign in')
+      return { data: null, error }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const signInWithGoogle = async () => {
+    try {
+      setLoading(true)
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      })
+
+      if (error) {
+        console.error('Google signin error:', error)
+        toast.error(error.message)
+        return { data: null, error }
+      }
+
+      return { data, error: null }
+    } catch (error) {
+      console.error('Google signin error:', error)
+      toast.error(error.message || 'Failed to sign in with Google')
       return { data: null, error }
     } finally {
       setLoading(false)
@@ -162,6 +180,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     signUp,
     signIn,
+    signInWithGoogle,
     signOut,
     fetchProfile
   }
