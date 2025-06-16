@@ -7,7 +7,7 @@ import Footer from './components/layout/Footer'
 import HomePage from './pages/HomePage'
 import CoursesPage from './pages/CoursesPage'
 import DashboardPage from './pages/DashboardPage'
-import AuthCallbackPage from './pages/AuthCallbackPage'
+import AuthCallbackPage from './pages/AuthCallbackPage.jsx'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 
 const App = () => {
