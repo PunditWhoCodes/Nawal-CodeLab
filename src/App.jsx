@@ -6,6 +6,7 @@ import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
 import HomePage from './pages/HomePage'
 import CoursesPage from './pages/CoursesPage'
+import CourseDetailPage from './pages/CourseDetailPage'
 import DashboardPage from './pages/DashboardPage'
 import AuthCallbackPage from './pages/AuthCallbackPage.jsx'
 import ProtectedRoute from './components/auth/ProtectedRoute'
@@ -20,6 +21,7 @@ const App = () => {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/courses" element={<CoursesPage />} />
+              <Route path="/courses/:courseId" element={<CourseDetailPage />} />
               <Route path="/auth/callback" element={<AuthCallbackPage />} />
               <Route 
                 path="/dashboard" 

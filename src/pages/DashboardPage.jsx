@@ -1,11 +1,13 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { BookOpen, Clock, Award, TrendingUp } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useEnrollments } from '../hooks/useCourses'
 import CourseCard from '../components/courses/CourseCard'
 
 const DashboardPage = () => {
+  const navigate = useNavigate()
   const { user, profile } = useAuth()
   const { enrollments, loading } = useEnrollments()
 
@@ -19,22 +21,28 @@ const DashboardPage = () => {
     {
       icon: Clock,
       label: 'Hours Learned',
-      value: '24',
+      value: Math.round(enrollments.reduce((acc, e) => acc + (e.progress || 0), 0) / 10),
       color: 'bg-green-500'
     },
     {
       icon: Award,
-      label: 'Certificates',
-      value: '2',
+      label: 'Completed',
+      value: enrollments.filter(e => e.progress === 100).length,
       color: 'bg-purple-500'
     },
     {
       icon: TrendingUp,
-      label: 'Progress',
-      value: '68%',
+      label: 'Avg Progress',
+      value: enrollments.length > 0 
+        ? `${Math.round(enrollments.reduce((acc, e) => acc + (e.progress || 0), 0) / enrollments.length)}%`
+        : '0%',
       color: 'bg-orange-500'
     }
   ]
+
+  const handleContinueLearning = (course) => {
+    navigate(`/courses/${course.id}`)
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -92,12 +100,19 @@ const DashboardPage = () => {
           ) : enrollments.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {enrollments.map((enrollment) => (
-                <CourseCard
-                  key={enrollment.id}
-                  course={enrollment.courses}
-                  isEnrolled={true}
-                  onEnroll={() => {}}
-                />
+                <div key={enrollment.id} className="relative">
+                  <CourseCard
+                    course={enrollment.courses}
+                    isEnrolled={true}
+                    onEnroll={handleContinueLearning}
+                  />
+                  {/* Progress overlay */}
+                  <div className="absolute top-4 left-4 bg-white px-2 py-1 rounded-lg shadow-lg">
+                    <span className="text-xs font-semibold text-green-600">
+                      {enrollment.progress || 0}% Complete
+                    </span>
+                  </div>
+                </div>
               ))}
             </div>
           ) : (
@@ -110,7 +125,7 @@ const DashboardPage = () => {
                 Start your learning journey by enrolling in a course
               </p>
               <button
-                onClick={() => window.location.href = '/courses'}
+                onClick={() => navigate('/courses')}
                 className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
               >
                 Browse Courses

@@ -1,10 +1,14 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { Clock, Users, Star, BookOpen, Play } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import Button from '../ui/Button'
 
 const CourseCard = ({ course, onEnroll, isEnrolled = false }) => {
+  const navigate = useNavigate()
+  
   const {
+    id,
     title,
     description,
     thumbnail_url,
@@ -21,11 +25,25 @@ const CourseCard = ({ course, onEnroll, isEnrolled = false }) => {
     acc + (module.course_lessons?.length || 0), 0
   ) || 0
 
+  const handleCardClick = () => {
+    navigate(`/courses/${id}`)
+  }
+
+  const handleEnrollClick = (e) => {
+    e.stopPropagation()
+    if (isEnrolled) {
+      navigate(`/courses/${id}`)
+    } else {
+      onEnroll(course)
+    }
+  }
+
   return (
     <motion.div
       whileHover={{ y: -8, scale: 1.02 }}
       transition={{ duration: 0.3 }}
-      className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300"
+      className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 cursor-pointer"
+      onClick={handleCardClick}
     >
       <div className="relative group">
         <img
@@ -103,10 +121,9 @@ const CourseCard = ({ course, onEnroll, isEnrolled = false }) => {
         )}
 
         <Button
-          onClick={() => onEnroll(course)}
+          onClick={handleEnrollClick}
           className="w-full"
           variant={isEnrolled ? 'secondary' : 'primary'}
-          disabled={isEnrolled}
         >
           {isEnrolled ? (
             <>
