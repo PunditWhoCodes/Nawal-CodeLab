@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Play, Pause, SkipBack, SkipForward, BookOpen, CheckCircle, Clock, Users } from 'lucide-react'
-import ReactPlayer from 'react-player'
+import { Play, SkipBack, SkipForward, Clock, ExternalLink } from 'lucide-react'
+import VideoPlayer from './VideoPlayer'
 import Button from '../ui/Button'
 
 const CoursePlayer = ({ course, currentLesson, onLessonChange, onProgressUpdate, userProgress = 0 }) => {
-  const [playing, setPlaying] = useState(false)
   const [played, setPlayed] = useState(0)
-  const [duration, setDuration] = useState(0)
-  const [currentTime, setCurrentTime] = useState(0)
+  const [videoError, setVideoError] = useState(false)
 
   const allLessons = course.course_modules?.flatMap(module => 
     module.course_lessons?.map(lesson => ({
@@ -22,25 +20,15 @@ const CoursePlayer = ({ course, currentLesson, onLessonChange, onProgressUpdate,
   const nextLesson = allLessons[currentLessonIndex + 1]
   const prevLesson = allLessons[currentLessonIndex - 1]
 
-  const handleProgress = (progress) => {
-    setPlayed(progress.played)
-    setCurrentTime(progress.playedSeconds)
-    
-    // Update progress when user watches 80% of the video
-    if (progress.played > 0.8 && onProgressUpdate) {
-      onProgressUpdate(currentLesson.id, 100)
-    }
-  }
-
-  const handleDuration = (duration) => {
-    setDuration(duration)
-  }
-
   const handleNext = () => {
     if (nextLesson && onLessonChange) {
       onLessonChange(nextLesson)
       setPlayed(0)
-      setCurrentTime(0)
+      setVideoError(false)
+      // Mark current lesson as completed when moving to next
+      if (onProgressUpdate) {
+        onProgressUpdate(currentLesson.id, 100)
+      }
     }
   }
 
@@ -48,19 +36,31 @@ const CoursePlayer = ({ course, currentLesson, onLessonChange, onProgressUpdate,
     if (prevLesson && onLessonChange) {
       onLessonChange(prevLesson)
       setPlayed(0)
-      setCurrentTime(0)
+      setVideoError(false)
     }
   }
 
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = Math.floor(seconds % 60)
-    return `${mins}:${secs.toString().padStart(2, '0')}`
+  const handleVideoError = (error) => {
+    console.error('Video error:', error)
+    setVideoError(true)
+  }
+
+  const openInYouTube = () => {
+    if (currentLesson?.video_url) {
+      window.open(currentLesson.video_url, '_blank')
+    }
+  }
+
+  const markAsCompleted = () => {
+    if (onProgressUpdate && currentLesson) {
+      onProgressUpdate(currentLesson.id, 100)
+      setPlayed(100)
+    }
   }
 
   if (!currentLesson) {
     return (
-      <div className="bg-gray-900 aspect-video flex items-center justify-center">
+      <div className="bg-gray-900 aspect-video flex items-center justify-center rounded-lg">
         <div className="text-center text-white">
           <Play size={64} className="mx-auto mb-4 opacity-50" />
           <p className="text-xl">Select a lesson to start learning</p>
@@ -72,23 +72,10 @@ const CoursePlayer = ({ course, currentLesson, onLessonChange, onProgressUpdate,
   return (
     <div className="bg-black rounded-lg overflow-hidden">
       <div className="relative aspect-video">
-        <ReactPlayer
-          url={currentLesson.video_url}
-          width="100%"
-          height="100%"
-          playing={playing}
-          onProgress={handleProgress}
-          onDuration={handleDuration}
-          controls={true}
-          config={{
-            youtube: {
-              playerVars: {
-                showinfo: 1,
-                modestbranding: 1,
-                rel: 0
-              }
-            }
-          }}
+        <VideoPlayer
+          videoUrl={currentLesson.video_url}
+          onProgress={setPlayed}
+          onError={handleVideoError}
         />
       </div>
 
@@ -109,7 +96,7 @@ const CoursePlayer = ({ course, currentLesson, onLessonChange, onProgressUpdate,
           </div>
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-4">
             <Button
               variant="outline"
@@ -129,6 +116,23 @@ const CoursePlayer = ({ course, currentLesson, onLessonChange, onProgressUpdate,
               Next
               <SkipForward size={16} className="ml-2" />
             </Button>
+
+            <Button
+              variant="outline"
+              onClick={openInYouTube}
+              className="flex items-center"
+            >
+              <ExternalLink size={16} className="mr-2" />
+              YouTube
+            </Button>
+
+            <Button
+              variant="secondary"
+              onClick={markAsCompleted}
+              className="flex items-center"
+            >
+              Mark Complete
+            </Button>
           </div>
 
           <div className="flex items-center space-x-4 text-sm text-gray-600">
@@ -145,14 +149,31 @@ const CoursePlayer = ({ course, currentLesson, onLessonChange, onProgressUpdate,
         {/* Progress bar */}
         <div className="mt-4">
           <div className="flex justify-between text-sm text-gray-600 mb-1">
-            <span>Progress</span>
-            <span>{Math.round(played * 100)}%</span>
+            <span>Lesson Progress</span>
+            <span>{Math.round(played)}%</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div 
               className="bg-green-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${played * 100}%` }}
+              style={{ width: `${played}%` }}
             />
+          </div>
+        </div>
+
+        {/* Video info */}
+        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-600">
+              Having trouble with the video? Try watching directly on YouTube for the best experience.
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={openInYouTube}
+              className="ml-4"
+            >
+              Open YouTube
+            </Button>
           </div>
         </div>
       </div>
