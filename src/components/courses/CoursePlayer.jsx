@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Play, SkipBack, SkipForward, Clock, CheckCircle } from 'lucide-react'
+import { Play, SkipBack, SkipForward, Clock, CheckCircle, BookOpen, Info } from 'lucide-react'
 import VideoPlayer from './VideoPlayer'
 import Button from '../ui/Button'
 
@@ -77,6 +77,12 @@ const CoursePlayer = ({ course, currentLesson, onLessonChange, onProgressUpdate,
 
   return (
     <div className="bg-black rounded-lg overflow-hidden">
+      {/* Demo Notice */}
+      <div className="bg-blue-600 text-white p-3 text-center text-sm">
+        <Info size={16} className="inline mr-2" />
+        Demo Mode: Videos are sample content for demonstration purposes
+      </div>
+
       <div className="relative aspect-video">
         <VideoPlayer
           videoUrl={currentLesson.video_url}
@@ -167,15 +173,52 @@ const CoursePlayer = ({ course, currentLesson, onLessonChange, onProgressUpdate,
           </div>
         </div>
 
-        {/* Lesson info */}
+        {/* Lesson Content */}
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="p-4 bg-blue-50 rounded-lg">
+            <h4 className="font-semibold text-blue-900 mb-2 flex items-center">
+              <BookOpen size={16} className="mr-2" />
+              Learning Objectives
+            </h4>
+            <ul className="text-sm text-blue-800 space-y-1">
+              <li>• Understand the core concepts</li>
+              <li>• Practice with hands-on examples</li>
+              <li>• Apply knowledge to real projects</li>
+            </ul>
+          </div>
+
+          <div className="p-4 bg-green-50 rounded-lg">
+            <h4 className="font-semibold text-green-900 mb-2 flex items-center">
+              <CheckCircle size={16} className="mr-2" />
+              Key Takeaways
+            </h4>
+            <ul className="text-sm text-green-800 space-y-1">
+              <li>• Take notes while watching</li>
+              <li>• Practice the examples shown</li>
+              <li>• Complete the lesson exercises</li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Course Resources */}
         <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-          <div className="text-sm text-gray-600">
-            <p className="mb-2">
-              <strong>Learning Tip:</strong> Take notes while watching and practice the concepts shown in the video.
-            </p>
-            <p>
-              Use the "Mark Complete" button when you've finished the lesson and understood the concepts.
-            </p>
+          <h4 className="font-semibold text-gray-900 mb-2">Course Resources</h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div className="text-center p-3 bg-white rounded border">
+              <BookOpen className="mx-auto mb-2 text-blue-600" size={20} />
+              <div className="font-medium">Documentation</div>
+              <div className="text-gray-600">Official docs & guides</div>
+            </div>
+            <div className="text-center p-3 bg-white rounded border">
+              <Play className="mx-auto mb-2 text-green-600" size={20} />
+              <div className="font-medium">Practice</div>
+              <div className="text-gray-600">Hands-on exercises</div>
+            </div>
+            <div className="text-center p-3 bg-white rounded border">
+              <CheckCircle className="mx-auto mb-2 text-purple-600" size={20} />
+              <div className="font-medium">Projects</div>
+              <div className="text-gray-600">Real-world examples</div>
+            </div>
           </div>
         </div>
       </div>
