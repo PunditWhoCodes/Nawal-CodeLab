@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Play, SkipBack, SkipForward, Clock, ExternalLink } from 'lucide-react'
+import { Play, SkipBack, SkipForward, Clock, CheckCircle } from 'lucide-react'
 import VideoPlayer from './VideoPlayer'
 import Button from '../ui/Button'
 
 const CoursePlayer = ({ course, currentLesson, onLessonChange, onProgressUpdate, userProgress = 0 }) => {
   const [played, setPlayed] = useState(0)
-  const [videoError, setVideoError] = useState(false)
+  const [lessonCompleted, setLessonCompleted] = useState(false)
 
   const allLessons = course.course_modules?.flatMap(module => 
     module.course_lessons?.map(lesson => ({
@@ -20,14 +20,18 @@ const CoursePlayer = ({ course, currentLesson, onLessonChange, onProgressUpdate,
   const nextLesson = allLessons[currentLessonIndex + 1]
   const prevLesson = allLessons[currentLessonIndex - 1]
 
+  useEffect(() => {
+    setPlayed(0)
+    setLessonCompleted(false)
+  }, [currentLesson])
+
   const handleNext = () => {
     if (nextLesson && onLessonChange) {
       onLessonChange(nextLesson)
-      setPlayed(0)
-      setVideoError(false)
       // Mark current lesson as completed when moving to next
-      if (onProgressUpdate) {
+      if (onProgressUpdate && !lessonCompleted) {
         onProgressUpdate(currentLesson.id, 100)
+        setLessonCompleted(true)
       }
     }
   }
@@ -35,26 +39,28 @@ const CoursePlayer = ({ course, currentLesson, onLessonChange, onProgressUpdate,
   const handlePrevious = () => {
     if (prevLesson && onLessonChange) {
       onLessonChange(prevLesson)
-      setPlayed(0)
-      setVideoError(false)
     }
   }
 
   const handleVideoError = (error) => {
     console.error('Video error:', error)
-    setVideoError(true)
-  }
-
-  const openInYouTube = () => {
-    if (currentLesson?.video_url) {
-      window.open(currentLesson.video_url, '_blank')
-    }
   }
 
   const markAsCompleted = () => {
-    if (onProgressUpdate && currentLesson) {
+    if (onProgressUpdate && currentLesson && !lessonCompleted) {
       onProgressUpdate(currentLesson.id, 100)
+      setLessonCompleted(true)
       setPlayed(100)
+    }
+  }
+
+  const handleProgressUpdate = (progress) => {
+    setPlayed(progress)
+    
+    // Auto-complete when video reaches 90%
+    if (progress >= 90 && !lessonCompleted && onProgressUpdate) {
+      onProgressUpdate(currentLesson.id, 100)
+      setLessonCompleted(true)
     }
   }
 
@@ -74,17 +80,22 @@ const CoursePlayer = ({ course, currentLesson, onLessonChange, onProgressUpdate,
       <div className="relative aspect-video">
         <VideoPlayer
           videoUrl={currentLesson.video_url}
-          onProgress={setPlayed}
+          onProgress={handleProgressUpdate}
           onError={handleVideoError}
         />
       </div>
 
       <div className="p-6 bg-white">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
-              {currentLesson.title}
-            </h3>
+            <div className="flex items-center mb-2">
+              <h3 className="text-xl font-bold text-gray-900 mr-3">
+                {currentLesson.title}
+              </h3>
+              {lessonCompleted && (
+                <CheckCircle className="text-green-600" size={24} />
+              )}
+            </div>
             <p className="text-gray-600 mb-2">
               Module: {currentLesson.moduleTitle}
             </p>
@@ -117,22 +128,16 @@ const CoursePlayer = ({ course, currentLesson, onLessonChange, onProgressUpdate,
               <SkipForward size={16} className="ml-2" />
             </Button>
 
-            <Button
-              variant="outline"
-              onClick={openInYouTube}
-              className="flex items-center"
-            >
-              <ExternalLink size={16} className="mr-2" />
-              YouTube
-            </Button>
-
-            <Button
-              variant="secondary"
-              onClick={markAsCompleted}
-              className="flex items-center"
-            >
-              Mark Complete
-            </Button>
+            {!lessonCompleted && (
+              <Button
+                variant="secondary"
+                onClick={markAsCompleted}
+                className="flex items-center"
+              >
+                <CheckCircle size={16} className="mr-2" />
+                Mark Complete
+              </Button>
+            )}
           </div>
 
           <div className="flex items-center space-x-4 text-sm text-gray-600">
@@ -154,26 +159,23 @@ const CoursePlayer = ({ course, currentLesson, onLessonChange, onProgressUpdate,
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div 
-              className="bg-green-600 h-2 rounded-full transition-all duration-300"
+              className={`h-2 rounded-full transition-all duration-300 ${
+                lessonCompleted ? 'bg-green-600' : 'bg-blue-600'
+              }`}
               style={{ width: `${played}%` }}
             />
           </div>
         </div>
 
-        {/* Video info */}
+        {/* Lesson info */}
         <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-600">
-              Having trouble with the video? Try watching directly on YouTube for the best experience.
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={openInYouTube}
-              className="ml-4"
-            >
-              Open YouTube
-            </Button>
+          <div className="text-sm text-gray-600">
+            <p className="mb-2">
+              <strong>Learning Tip:</strong> Take notes while watching and practice the concepts shown in the video.
+            </p>
+            <p>
+              Use the "Mark Complete" button when you've finished the lesson and understood the concepts.
+            </p>
           </div>
         </div>
       </div>
