@@ -21,6 +21,16 @@ const Header = () => {
     setIsProfileOpen(false)
   }
 
+  const openSignIn = () => {
+    setAuthModal({ isOpen: true, mode: 'signin' })
+    setIsMenuOpen(false)
+  }
+
+  const openSignUp = () => {
+    setAuthModal({ isOpen: true, mode: 'signup' })
+    setIsMenuOpen(false)
+  }
+
   return (
     <>
       <header className="bg-white shadow-sm sticky top-0 z-40">
@@ -92,12 +102,12 @@ const Header = () => {
                 <div className="flex items-center space-x-3">
                   <Button
                     variant="ghost"
-                    onClick={() => setAuthModal({ isOpen: true, mode: 'signin' })}
+                    onClick={openSignIn}
                   >
                     Sign In
                   </Button>
                   <Button
-                    onClick={() => setAuthModal({ isOpen: true, mode: 'signup' })}
+                    onClick={openSignUp}
                   >
                     Sign Up
                   </Button>
@@ -157,19 +167,13 @@ const Header = () => {
                   <div className="flex flex-col space-y-2 pt-4 border-t">
                     <Button
                       variant="ghost"
-                      onClick={() => {
-                        setAuthModal({ isOpen: true, mode: 'signin' })
-                        setIsMenuOpen(false)
-                      }}
+                      onClick={openSignIn}
                       className="justify-start"
                     >
                       Sign In
                     </Button>
                     <Button
-                      onClick={() => {
-                        setAuthModal({ isOpen: true, mode: 'signup' })
-                        setIsMenuOpen(false)
-                      }}
+                      onClick={openSignUp}
                       className="justify-start"
                     >
                       Sign Up

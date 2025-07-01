@@ -65,6 +65,9 @@ const HomePage = () => {
     }
   ]
 
+  const openSignIn = () => setAuthModal({ isOpen: true, mode: 'signin' })
+  const openSignUp = () => setAuthModal({ isOpen: true, mode: 'signup' })
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -105,7 +108,7 @@ const HomePage = () => {
                   <>
                     <Button
                       size="lg"
-                      onClick={() => setAuthModal({ isOpen: true, mode: 'signup' })}
+                      onClick={openSignUp}
                       className="group bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
                     >
                       Start Learning Today
@@ -374,7 +377,7 @@ const HomePage = () => {
               <Button
                 size="lg"
                 variant="secondary"
-                onClick={() => setAuthModal({ isOpen: true, mode: 'signup' })}
+                onClick={openSignUp}
                 className="bg-white text-green-600 hover:bg-gray-100 group"
               >
                 Get Started Now
